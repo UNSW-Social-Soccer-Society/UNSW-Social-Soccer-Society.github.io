@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
@@ -103,6 +104,15 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
+    // Disable certificate validation
+    // Create an HttpClient with custom certificate validation
+    HttpClient httpClient = HttpClient()
+      ..badCertificateCallback =
+          ((X509Certificate cert, String host, int port) => true);
+
+    // Use the HttpClient to create an IOClient
+    http.Client client = http.Client();
+
     // send post request to the server
     var responseString = await http.post(
       Uri.https(server.url, 'register_website/'),
@@ -149,6 +159,9 @@ class _RegisterPageState extends State<RegisterPage> {
       }
       return;
     }
+
+    // Close the client when done
+    client.close();
 
     // successful registration
     Navigator.pop(context);
