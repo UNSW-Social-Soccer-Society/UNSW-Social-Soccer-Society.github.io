@@ -105,7 +105,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     // send post request to the server
     var responseString = await http.post(
-      Uri.http(server.url, 'register_website/'),
+      Uri.https(server.url, 'register_website/'),
       headers: {
         "Content-Type": "application/json",
       },
