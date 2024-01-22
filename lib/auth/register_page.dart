@@ -105,32 +105,49 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     // Disable certificate validation
-    // Create an HttpClient with custom certificate validation
-    HttpClient httpClient = HttpClient()
-      ..badCertificateCallback =
-          ((X509Certificate cert, String host, int port) => true);
+    /// Create an HttpClient with custom certificate validation
+    HttpClient httpClient = HttpClient();
+    httpClient.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
 
-    // Use the HttpClient to create an IOClient
-    http.Client client = http.Client();
+    // // send post request to the server
+    // var responseString = await http.post(
+    //   Uri.https(server.url, 'register_website/'),
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: jsonEncode({
+    //     'firstname': firstController.text,
+    //     'lastname': lastController.text,
+    //     'email': emailController.text,
+    //     'zID': int.parse(zidController.text),
+    //     'degree': faculty,
+    //     'arc': arc,
+    //     'graduation': graduation,
+    //   }),
+    // );
 
-    // send post request to the server
-    var responseString = await http.post(
-      Uri.https(server.url, 'register_website/'),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        'firstname': firstController.text,
-        'lastname': lastController.text,
-        'email': emailController.text,
-        'zID': int.parse(zidController.text),
-        'degree': faculty,
-        'arc': arc,
-        'graduation': graduation,
-      }),
-    );
+    // final response = json.decode(responseString.body);
 
-    final response = json.decode(responseString.body);
+    HttpClientRequest request =
+        await httpClient.postUrl(Uri.https(server.url, 'register_website/'));
+    request.headers.set('Content-Type', 'application/json');
+    request.add(utf8.encode(json.encode({
+      'firstname': firstController.text,
+      'lastname': lastController.text,
+      'email': emailController.text,
+      'zID': int.parse(zidController.text),
+      'degree': faculty,
+      'arc': arc,
+      'graduation': graduation,
+    })));
+    HttpClientResponse responseString = await request.close();
+
+    // Read and decode the response body
+    String responseBody = await utf8.decodeStream(responseString);
+
+    // Parse the JSON response
+    final response = json.decode(responseBody);
 
     // error handling
     if (response['success'] == false) {
@@ -159,9 +176,6 @@ class _RegisterPageState extends State<RegisterPage> {
       }
       return;
     }
-
-    // Close the client when done
-    client.close();
 
     // successful registration
     Navigator.pop(context);
